@@ -1,0 +1,152 @@
+.App {
+  text-align: center;
+}
+
+.loading-screen {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-rotate {
+  animation: rotation 2s infinite linear;
+  max-width: 200px;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body {
+  background-color: black;
+}
+
+.loading-screen {
+  background-color: black;
+}
+
+.header {
+  padding: 20px;
+}
+
+.logo {
+  max-width: 300px;
+  margin-right: 20px; /* Adjust the value as needed */
+}
+
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.tipjar-container {
+  margin-top: 20px;
+}
+
+.button-container img {
+  margin: 0 10px;
+  max-width: 100px;
+}
+
+.tipjar-container img {
+  max-width: 200px;
+}
+
+.button-container img.deposit-button,
+.button-container img.withdraw-button {
+  max-width: 150px; /* Adjust the width as per your preference */
+}
+
+.button-container img.info-button {
+  max-width: 80px; /* Adjust the width as per your preference */
+  margin-right: 80px; /* Adjust the spacing between the buttons */
+}
+
+.button-container img.login-button {
+  max-width: 80px; /* Adjust the width as per your preference */
+  margin-right: 20px; /* Adjust the spacing between the buttons */
+}
+
+.statistics-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 70px;
+}
+
+.statistics-container .statistic-number {
+  margin-left: 10px;
+  font-size: 16px; /* Adjust the font size as needed */
+}
+
+.statistics-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.statistics-container img {
+  margin: 0 10px;
+  max-width: 150px;
+}
+.statistics-container img.all-stats {
+  max-width: 150px; /* Adjust the size as per your preference */
+}
+
+.statistics-container img.tipped-image,
+.statistics-container img.tippers-image,
+.statistics-container img.deposited-image,
+.statistics-container img.withdrawn-image {
+  margin-right: 20px; 
+  max-width: 110px;
+  margin-left: -60px; 
+}
+
+.my-stats-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 40px; /* Adjust the margin-top value as needed */
+}
+
+.my-stats-container img {
+  margin: 0 10px;
+  max-width: 150px; /* Adjust the size as per your preference */
+}
+
+.my-stats-container .statistics-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.my-stats-container img.tips-given-image,
+.my-stats-container img.tips-received-image,
+.my-stats-container img.deposited-image,
+.my-stats-container img.withdrawn-image {
+  margin-right: 20px; 
+  max-width: 140px;
+  margin-left: -60px; 
+}
+
+.casswashere {
+  margin-top: 100px;
+  display: flex;
+  justify-content: center;
+}
+
+.casswashere img {
+  max-width: 120px;
+}
