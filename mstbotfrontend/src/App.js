@@ -127,7 +127,7 @@ const withdraw = () => {
                       onClick={saveUserData} // Call saveUserData when the login button is clicked
                     />
                   </div>
-            <img src={loginImage} alt="Login" className="login-button" />
+            
           </div>
           <div className="tipjar-container">
             <img src={tipjarImage} alt="Tip Jar" />
