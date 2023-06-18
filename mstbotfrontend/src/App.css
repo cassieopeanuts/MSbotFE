@@ -37,7 +37,7 @@ body {
 
 .logo {
   max-width: 300px;
-  margin-right: 20px; /* Adjust the value as needed */
+  margin-right: 20px; 
 }
 
 
@@ -62,17 +62,17 @@ body {
 
 .button-container img.deposit-button,
 .button-container img.withdraw-button {
-  max-width: 150px; /* Adjust the width as per your preference */
+  max-width: 150px; 
 }
 
 .button-container img.info-button {
-  max-width: 80px; /* Adjust the width as per your preference */
-  margin-right: 80px; /* Adjust the spacing between the buttons */
+  max-width: 80px; 
+  margin-right: 80px; 
 }
 
 .button-container img.login-button {
-  max-width: 80px; /* Adjust the width as per your preference */
-  margin-right: 20px; /* Adjust the spacing between the buttons */
+  max-width: 80px; 
+  margin-right: 20px; 
 }
 
 .statistics-container {
@@ -85,7 +85,7 @@ body {
 
 .statistics-container .statistic-number {
   margin-left: 10px;
-  font-size: 16px; /* Adjust the font size as needed */
+  font-size: 16px; 
 }
 
 .statistics-row {
@@ -100,7 +100,7 @@ body {
   max-width: 150px;
 }
 .statistics-container img.all-stats {
-  max-width: 150px; /* Adjust the size as per your preference */
+  max-width: 150px;
 }
 
 .statistics-container img.tipped-image,
@@ -117,12 +117,12 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  margin-top: 40px; /* Adjust the margin-top value as needed */
+  margin-top: 40px; 
 }
 
 .my-stats-container img {
   margin: 0 10px;
-  max-width: 150px; /* Adjust the size as per your preference */
+  max-width: 150px; 
 }
 
 .my-stats-container .statistics-row {
@@ -149,4 +149,37 @@ body {
 
 .casswashere img {
   max-width: 120px;
+}
+
+.popup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup-content {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  max-width: 400px;
+  text-align: center;
+  color: rgb(205, 4, 255);
+}
+
+.popup-content h2 {
+  margin-top: 0;
+}
+
+.popup-content button {
+  margin-top: 20px;
+  color: rgb(205, 4, 255);
+  font-family: 'DotGothic16', sans-serif;
+  font-weight: bold;
+  font-size: 14px;
 }

@@ -1,0 +1,16 @@
+[package]
+name = "tip_jar_backend"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+warp = "0.3.5"
+tokio = { version = "1", features = ["full"] }
+oauth2 = "4.4.1"
+reqwest = "0.11.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1.0.72"
+web3 = "0.16.0"
+firestore = "0.32.2"
+dotenv = "0.15.0"

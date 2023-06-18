@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import Web3 from 'web3';
 import logo from './logo.png';
 import mainlogoImage from './main-logo.png';
 import infoImage from './info.png';
@@ -19,6 +20,10 @@ import cassieImage from './cassie.png';
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [infoPopupOpen, setInfoPopupOpen] = useState(false);
+  const [ethAddress, setEthAddress] = useState(null);
+  const [web3, setWeb3] = useState(null);
+  const [contract, setContract] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,6 +32,65 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => {
+        if (accounts.length > 0) {
+          setEthAddress(accounts[0]);
+        }
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (ethAddress) {
+      const web3Instance = new Web3(window.ethereum);
+      const contractInstance = new web3Instance.eth.Contract('your contract ABI here', 'your contract address here');
+      setWeb3(web3Instance);
+      setContract(contractInstance);
+    }
+  }, [ethAddress]);
+
+// Function to save user data
+const saveUserData = () => {
+  if (ethAddress) {
+    const actualBackendURL = 'https://my-actual-backend.com/api/store_user_data';  // replace this with your actual backend URL
+    const actualDiscordUserId = getDiscordUserId();  // replace this with a function or variable that provides the actual Discord user ID
+
+    fetch(actualBackendURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        discord_id: actualDiscordUserId, 
+        ethereum_address: ethAddress
+      })
+    }).then(response => {
+      // handle response
+    }).catch(error => {
+      // handle error
+    });
+  }
+};
+
+const deposit = () => {
+  const amount = web3.utils.toWei('0.1', 'ether'); 
+  contract.methods.deposit(amount).send({ from: ethAddress })
+    .on('transactionHash', function(hash) {
+      console.log(hash);
+    });
+}
+
+const withdraw = () => {
+  // You need to adjust the amount according to your needs 
+  const amount = web3.utils.toWei('0.1', 'ether'); 
+  contract.methods.withdraw(amount).send({ from: ethAddress })
+    .on('transactionHash', function(hash) {
+      console.log(hash);
+    });
+}
 
   return (
     <div className="App">
@@ -40,15 +104,37 @@ function App() {
             <img src={mainlogoImage} className="logo" alt="Logo" />
           </header>
           <div className="button-container">
-            <img src={infoImage} alt="Info" className="info-button" />
+            <img
+              src={infoImage}
+              alt="Info"
+              className="info-button"
+              onClick={() => setInfoPopupOpen(true)}
+            />
+            {infoPopupOpen && (
+          <div className="popup-container">
+            <div className="popup-content">
+              <h2>Project Description</h2>
+              <p>Add your project description here.</p>
+              <button onClick={() => setInfoPopupOpen(false)}>Close</button>
+            </div>
+          </div>
+        )}
+            <div className="button-container">
+                    <img
+                      src={loginImage}
+                      alt="Login"
+                      className="login-button"
+                      onClick={saveUserData} // Call saveUserData when the login button is clicked
+                    />
+                  </div>
             <img src={loginImage} alt="Login" className="login-button" />
           </div>
           <div className="tipjar-container">
             <img src={tipjarImage} alt="Tip Jar" />
           </div>
           <div className="button-container">
-            <img src={depositImage} alt="Deposit" className="deposit-button" />
-            <img src={withdrawImage} alt="Withdraw" className="withdraw-button" />
+            <img src={depositImage} alt="Deposit" className="deposit-button" onClick={deposit} />
+            <img src={withdrawImage} alt="Withdraw" className="withdraw-button" onClick={withdraw} />
           </div>
           <div className="statistics-container">
             <img src={allStatsImage} alt="All Stats" className="all-stats" />
@@ -96,5 +182,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
