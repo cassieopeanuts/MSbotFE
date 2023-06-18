@@ -21,13 +21,11 @@ contract TipJar {
     address public movrTokenAddress;
     uint256 public totalDeposits;
     uint256 public totalWithdrawals;
-    uint256 public totalFeesSpent;
+    uint256 public totalFees;
 
     mapping(address => uint256) private balances;
     mapping(address => uint256) public deposits;
     mapping(address => uint256) public withdrawals;
-
-    uint256 public totalFees;
 
     event Deposited(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
@@ -51,13 +49,12 @@ contract TipJar {
     }
 
     function withdraw(uint256 amount) external {
-        require(balances[msg.sender] >= amount + amount / 100, "Insufficient balance");
         uint256 fee = amount / 100; // 1% fee
+        require(balances[msg.sender] >= amount + fee, "Insufficient balance");
         uint256 amountAfterFee = amount - fee;
         balances[msg.sender] -= amount + fee;
         require(seedsToken.transfer(msg.sender, amountAfterFee), "Transfer to the user failed");
-        require(seedsToken.transfer(address(this), fee), "Transfer of the fee to the contract failed");
-        totalFeesSpent += fee;
+        totalFees += fee;
         totalWithdrawals += amount;
         withdrawals[msg.sender] += amount;
         emit Withdrawn(msg.sender, amountAfterFee);
@@ -65,6 +62,7 @@ contract TipJar {
 
     function donate(uint256 amount) external {
         require(seedsToken.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        totalFees += amount;
         emit Donated(msg.sender, amount);
     }
 
@@ -75,40 +73,32 @@ contract TipJar {
     address public constant botAddress = 0x44c871a27f2AE6aF62000DCAd157793C615957aa;
 
     function swapFeesForMOVR() external {
-    require(msg.sender == botAddress, "Only the bot can call this function");
-
-    uint256 seedBalance = seedsToken.balanceOf(address(this));
-    require(seedBalance > 0, "No SEEDS tokens to swap");
-
-    seedsToken.approve(address(uniswapRouter), seedBalance);
-
-    address[] memory path = new address[](2);
-    path[0] = address(seedsToken);
-    path[1] = movrTokenAddress;
-    uint256[] memory amountsOut = uniswapRouter.getAmountsOut(seedBalance, path);
-    uint256 minMovrAmount = amountsOut[1];
-
-    // Store the amount of MOVR received after the swap
-    uint256[] memory amountsIn = uniswapRouter.swapExactTokensForTokens(
-        seedBalance,
-        minMovrAmount,
-        path,
-        address(this),
-        block.timestamp
-    );
-
-    uint256 movrReceived = amountsIn[1];
-
-    totalFees = 0;
-
-    emit Swapped(seedBalance, movrReceived);
+        require(msg.sender == botAddress, "Only the bot can call this function");
+        uint256 seedBalance = seedsToken.balanceOf(address(this));
+        require(seedBalance > 0, "No SEEDS tokens to swap");
+        seedsToken.approve(address(uniswapRouter), seedBalance);
+        address[] memory path = new address[](2);
+        path[0] = address(seedsToken);
+        path[1] = movrTokenAddress;
+        uint256[] memory amountsOut = uniswapRouter.getAmountsOut(seedBalance, path);
+        uint256 minMovrAmount = amountsOut[1];
+        // Store the amount of MOVR received after the swap
+        uint256[] memory amountsIn = uniswapRouter.swapExactTokensForTokens(
+            seedBalance,
+            minMovrAmount,
+            path,
+            address(this),
+            block.timestamp
+        );
+        uint256 movrReceived = amountsIn[1];
+        totalFees = 0;
+        emit Swapped(seedBalance, movrReceived);
     }
 
     function transfer(address recipient, uint256 amount) external {
-    require(balances[msg.sender] >= amount, "Insufficient balance");
-    balances[msg.sender] -= amount;
-    balances[recipient] += amount;
-    emit Transfer(msg.sender, recipient, amount);
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        balances[recipient] += amount;
+        emit Transfer(msg.sender, recipient, amount);
     }
-
 }
