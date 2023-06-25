@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
 import logo from './logo.png';
 import mainlogoImage from './main-logo.png';
 import infoImage from './info.png';
@@ -24,6 +25,12 @@ function App() {
   const [ethAddress, setEthAddress] = useState(null);
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
+  const [hasProvider, setHasProvider] = useState(null);
+  const initialState = { accounts: [], chainId: "" };
+  const [wallet, setWallet] = useState(initialState);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -51,6 +58,74 @@ function App() {
       setContract(contractInstance);
     }
   }, [ethAddress]);
+
+  useEffect(() => {
+    const getProvider = async () => {
+      const provider = await detectEthereumProvider({ silent: true });
+      setHasProvider(Boolean(provider));
+
+      if (provider) {
+        const accounts = await window.ethereum.request(
+          { method: 'eth_accounts' }
+        )
+        refreshAccounts(accounts)
+        window.ethereum.on('accountsChanged', refreshAccounts)
+        window.ethereum.on('chainChanged', refreshChain)
+      }
+    }
+
+    const refreshAccounts = (accounts) => {
+      if (accounts.length > 0) {
+        updateWallet(accounts)
+      } else {
+        setWallet(initialState)
+      }
+    }
+
+    const refreshChain = (chainId) => {
+      setWallet((wallet) => ({ ...wallet, chainId }))
+    }
+
+    getProvider()
+
+    return () => {
+      if(window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', refreshAccounts)
+        window.ethereum.removeListener('chainChanged', refreshChain)
+      }
+    }
+  }, []);
+
+  const updateWallet = async (accounts) => {
+    if(window.ethereum) {
+      const balance = await window.ethereum.request({
+        method: "eth_getBalance",
+        params: [accounts[0], "latest"],
+      })
+      const chainId = await window.ethereum.request({
+        method: "eth_chainId",
+      })
+      setWallet({ accounts, balance, chainId });
+    }
+  }
+
+  const handleConnect = async () => {
+    setIsConnecting(true)
+    if(window.ethereum) {
+      await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })
+      .then((accounts) => {
+        setError(false)
+        updateWallet(accounts)
+      })
+      .catch((err) => {
+        setError(true)
+        setErrorMessage(err.message)
+      })
+      setIsConnecting(false)
+    }
+  }
 
 // Function to save user data
 const saveUserData = () => {
@@ -182,6 +257,5 @@ const withdraw = () => {
     </div>
   );
 }
-
 
 export default App;
