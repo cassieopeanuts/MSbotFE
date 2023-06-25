@@ -130,8 +130,8 @@ function App() {
 // Function to save user data
 const saveUserData = () => {
   if (ethAddress) {
-    const actualBackendURL = 'https://my-actual-backend.com/api/store_user_data';  // replace this with your actual backend URL
-    const actualDiscordUserId = getDiscordUserId();  // replace this with a function or variable that provides the actual Discord user ID
+    const actualBackendURL = 'https://tipjar-back.vercel.app/';  // replace this with your actual backend URL
+    const actualDiscordUserId = get_discord_id();  // replace this with a function or variable that provides the actual Discord user ID
 
     fetch(actualBackendURL, {
       method: 'POST',
