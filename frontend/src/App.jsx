@@ -35,7 +35,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 5000);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -127,13 +127,29 @@ function App() {
     }
   }
 
-// Function to save user data
-const saveUserData = () => {
-  if (ethAddress) {
-    const actualBackendURL = 'https://tipjar-back.vercel.app/api/main';  // replace this with your actual backend URL
-    const actualDiscordUserId = get_discord_id();  // replace this with a function or variable that provides the actual Discord user ID
+// Function to get Discord user ID
+const getDiscordUserId = async () => {
+  const response = await fetch('https://tipjar-back.vercel.app/api/main', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      /* any necessary data for the backend request, such as a Discord auth code */
+    })
+  });
 
-    fetch(actualBackendURL, {
+  const data = await response.json();
+
+  return data.discord_id;  // or whatever field contains the Discord user ID in the response
+};
+
+// Function to save user data
+const saveUserData = async () => {
+  if (ethAddress) {
+    const actualDiscordUserId = await getDiscordUserId();
+
+    fetch('https://tipjar-back.vercel.app/api/main', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

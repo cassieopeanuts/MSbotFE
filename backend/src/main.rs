@@ -26,15 +26,25 @@ struct DiscordUser {
 }
 
 async fn get_discord_id(code: String, firestore_client: Arc<FirestoreClient>) -> Result<String, warp::Rejection> {
+    
+    let discord_client_id = std::env::var("DISCORD_CLIENT_ID")
+    .expect("DISCORD_CLIENT_ID not found in environment variables");
+
+    let discord_client_secret = std::env::var("DISCORD_CLIENT_SECRET")
+    .expect("DISCORD_CLIENT_SECRET not found in environment variables");
+
+    let discord_redirect_url = std::env::var("DISCORD_REDIRECT_URL")
+    .expect("DISCORD_REDIRECT_URL not found in environment variables");
+
     // Configure the OAuth2 client
     let client = BasicClient::new(
-        ClientId::new("your_client_id".to_string()),
-        Some(ClientSecret::new("your_client_secret".to_string())),
+        ClientId::new(discord_client_id),
+        Some(ClientSecret::new(discord_client_secret)),
         AuthUrl::new("https://discord.com/api/oauth2/authorize".to_string()).unwrap(),
         Some(TokenUrl::new("https://discord.com/api/oauth2/token".to_string()).unwrap()),
     )
-    .set_redirect_url(RedirectUrl::new("your_redirect_url".to_string()).unwrap());
-
+    .set_redirect_url(RedirectUrl::new(discord_redirect_url).unwrap());
+    
     // Exchange the authorization code for an access token
     let token_result = client.exchange_code(AuthorizationCode::new(code)).request(async_http_client).await;
 
@@ -96,44 +106,34 @@ async fn get_discord_id(code: String, firestore_client: Arc<FirestoreClient>) ->
 async fn main() {
     dotenv().ok();
     
-    let discord_client_id = std::env::var("REACT_APP_DISCORD_CLIENT_ID")
+    let discord_client_id = std::env::var("DISCORD_CLIENT_ID")
         .expect("Discord client ID not found in environment variables");
 
-    let redirect_uri = std::env::var("REACT_APP_REDIRECT_URI")
+    let redirect_uri = std::env::var("REDIRECT_URI")
         .expect("Redirect URI not found in environment variables");
 
-    let discord_secret = std::env::var("REACT_APP_DISCORD_SECRET")
+    let discord_secret = std::env::var("DISCORD_SECRET")
         .expect("Discord secret not found in environment variables");
 
-    let requested_scopes = std::env::var("REACT_APP_REQUESTED_SCOPES")
+    let requested_scopes = std::env::var("REQUESTED_SCOPES")
         .expect("Requested scopes not found in environment variables");
 
-    let firebase_api_key = std::env::var("REACT_APP_FIREBASE_API_KEY")
-        .expect("Firebase API key not found in environment variables");
-
-    let firebase_auth_domain = std::env::var("REACT_APP_FIREBASE_AUTH_DOMAIN")
-        .expect("Firebase auth domain not found in environment variables");
-
-    let firebase_project_id = std::env::var("REACT_APP_FIREBASE_PROJECT_ID")
-        .expect("Firebase project ID not found in environment variables");
-
-    let firebase_storage_bucket = std::env::var("REACT_APP_FIREBASE_STORAGE_BUCKET")
-        .expect("Firebase storage bucket not found in environment variables");
-
-    let firebase_messaging_sender_id = std::env::var("REACT_APP_FIREBASE_MESSAGING_SENDER_ID")
-        .expect("Firebase messaging sender ID not found in environment variables");
-
-    let firebase_app_id = std::env::var("REACT_APP_FIREBASE_APP_ID")
-        .expect("Firebase app ID not found in environment variables");
-
-    let firebase_database_url = std::env::var("REACT_APP_FIREBASE_DATABASE_URL")
-        .expect("Firebase database URL not found in environment variables");
-
-    let firestore_document_id = std::env::var("REACT_APP_FIRESTORE_DOCUMENT_ID")
-        .expect("Firestore document ID not found in environment variables");
-
-    let credentials = Credentials::from_file("path/to/service_account_key.json")
-        .expect("Failed to load Firestore credentials");
+        let mut service_account_info: HashMap<&str, &str> = HashMap::new();
+        service_account_info.insert("type", "service_account");
+        service_account_info.insert("project_id", std::env::var("FIREBASE_PROJECT_ID").unwrap().as_str());
+        service_account_info.insert("private_key_id", std::env::var("FIREBASE_PRIVATE_KEY_ID").unwrap().as_str());
+        // Note: the newline characters (\n) in the private key must be properly preserved. Environment variables in .env files can't contain actual newlines, so you'll need to replace "\n" with the newline character after fetching it.
+        service_account_info.insert("private_key", std::env::var("FIREBASE_PRIVATE_KEY").unwrap().replace("\\n", "\n").as_str());
+        service_account_info.insert("client_email", std::env::var("FIREBASE_CLIENT_EMAIL").unwrap().as_str());
+        service_account_info.insert("client_id", std::env::var("FIREBASE_CLIENT_ID").unwrap().as_str());
+        service_account_info.insert("auth_uri", "https://accounts.google.com/o/oauth2/auth");
+        service_account_info.insert("token_uri", "https://oauth2.googleapis.com/token");
+        service_account_info.insert("auth_provider_x509_cert_url", "https://www.googleapis.com/oauth2/v1/certs");
+        service_account_info.insert("client_x509_cert_url", std::env::var("FIREBASE_CLIENT_CERT_URL").unwrap().as_str());
+        
+        let credentials = Credentials::from_service_account_info(&service_account_info)
+            .expect("Failed to load Firestore credentials");
+        
 
     let firestore = Firestore::new(credentials).expect("Failed to initialize Firestore client");
     
