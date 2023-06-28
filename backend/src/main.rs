@@ -119,8 +119,8 @@ async fn main() {
     let requested_scopes = std::env::var("REQUESTED_SCOPES")
         .expect("Requested scopes not found in environment variables");
 
-        let private_key = env::var("FIREBASE_PRIVATE_KEY").unwrap();
-        
+        let base64_key = env::var("FIREBASE_PRIVATE_KEY").unwrap();
+        let private_key = String::from_utf8(decode(&base64_key).unwrap()).unwrap();
         
         let mut service_account_info: HashMap<&str, &str> = HashMap::new();
         service_account_info.insert("private_key", private_key.as_str());
