@@ -98,17 +98,18 @@ function App() {
 
   const updateWallet = async (accounts) => {
     if(window.ethereum) {
-      const balance = await window.ethereum.request({
+      let balance = await window.ethereum.request({
         method: "eth_getBalance",
         params: [accounts[0], "latest"],
       })
+      balance = web3.utils.fromWei(balance, 'ether');  // Convert from Wei to Ether
       const chainId = await window.ethereum.request({
         method: "eth_chainId",
       })
       setWallet({ accounts, balance, chainId });
     }
   }
-
+  
   const handleConnect = async () => {
     setIsConnecting(true)
     if(window.ethereum) {
@@ -168,7 +169,7 @@ const saveUserData = async () => {
 
 const deposit = () => {
   const amount = web3.utils.toWei('0.0000000000000001', 'ether'); 
-  contract.methods.deposit(amount).send({ from: ethAddress })
+  contract.methods.deposit(amount.toString()).send({ from: ethAddress })
     .on('transactionHash', function(hash) {
       console.log(hash);
     });
@@ -177,7 +178,7 @@ const deposit = () => {
 const withdraw = () => {
   // You need to adjust the amount according to your needs 
   const amount = web3.utils.toWei('0.0000000000000001', 'ether'); 
-  contract.methods.withdraw(amount).send({ from: ethAddress })
+  contract.methods.withdraw(amount.toString()).send({ from: ethAddress })
     .on('transactionHash', function(hash) {
       console.log(hash);
     });
