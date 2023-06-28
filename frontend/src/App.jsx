@@ -18,8 +18,6 @@ import tipsGivenImage from './tips-given.png';
 import tipsReceivedImage from './tips-received.png';
 import myStatsImage from './my-stats.png';
 import cassieImage from './cassie.png';
-import BN from 'bn.js';
-
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -168,14 +166,8 @@ const saveUserData = async () => {
   }
 };
 
-
-
 const deposit = () => {
-  // Convert the Ether amount to Wei as a BN object
-  const amountInEther = new BN(web3.utils.toWei('0.000000000001', 'ether'));
-  // Convert the BN object to a string for use in the transaction
-  const amount = amountInEther.toString();
-  
+  const amount = web3.utils.toWei('0.0000000000000001', 'ether'); 
   contract.methods.deposit(amount).send({ from: ethAddress })
     .on('transactionHash', function(hash) {
       console.log(hash);
@@ -183,11 +175,8 @@ const deposit = () => {
 }
 
 const withdraw = () => {
-  // You need to adjust the amount according to your needs
-  const amountInEther = new BN(web3.utils.toWei('0.000000000001', 'ether'));
-  // Convert the BN object to a string for use in the transaction
-  const amount = amountInEther.toString();
-  
+  // You need to adjust the amount according to your needs 
+  const amount = web3.utils.toWei('0.0000000000000001', 'ether'); 
   contract.methods.withdraw(amount).send({ from: ethAddress })
     .on('transactionHash', function(hash) {
       console.log(hash);
