@@ -11,7 +11,7 @@ use reqwest::header::AUTHORIZATION;
 use tokio::sync::Mutex;
 
 struct FirestoreClient {
-    pub client: Mutex<Firestore>,
+    pub client: Mutex<Arc<Firestore>>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -118,12 +118,15 @@ async fn main() {
     let requested_scopes = std::env::var("REQUESTED_SCOPES")
         .expect("Requested scopes not found in environment variables");
 
+        let private_key_str = std::env::var("FIREBASE_PRIVATE_KEY").unwrap();
+    
+        let private_key = private_key_str.replace("\\n", "\n");
+        
         let mut service_account_info: HashMap<&str, &str> = HashMap::new();
+        service_account_info.insert("private_key", private_key.as_str());
         service_account_info.insert("type", "service_account");
         service_account_info.insert("project_id", std::env::var("FIREBASE_PROJECT_ID").unwrap().as_str());
         service_account_info.insert("private_key_id", std::env::var("FIREBASE_PRIVATE_KEY_ID").unwrap().as_str());
-        // Note: the newline characters (\n) in the private key must be properly preserved. Environment variables in .env files can't contain actual newlines, so you'll need to replace "\n" with the newline character after fetching it.
-        service_account_info.insert("private_key", std::env::var("FIREBASE_PRIVATE_KEY").unwrap().replace("\\n", "\n").as_str());
         service_account_info.insert("client_email", std::env::var("FIREBASE_CLIENT_EMAIL").unwrap().as_str());
         service_account_info.insert("client_id", std::env::var("FIREBASE_CLIENT_ID").unwrap().as_str());
         service_account_info.insert("auth_uri", "https://accounts.google.com/o/oauth2/auth");
@@ -131,40 +134,51 @@ async fn main() {
         service_account_info.insert("auth_provider_x509_cert_url", "https://www.googleapis.com/oauth2/v1/certs");
         service_account_info.insert("client_x509_cert_url", std::env::var("FIREBASE_CLIENT_CERT_URL").unwrap().as_str());
         
-        let credentials = Credentials::from_service_account_info(&service_account_info)
-            .expect("Failed to load Firestore credentials");
-        
+            let credentials = Credentials::from_service_account_info(&service_account_info)  
+                .expect("Failed to load Firestore credentials");
 
-    let firestore = Firestore::new(credentials).expect("Failed to initialize Firestore client");
+            let firestore = Firestore::new(credentials).expect("Failed to initialize Firestore client");
     
-    let firestore_client = FirestoreClient {
-            client: Mutex::new(firestore),
-        };
-        
+            let firestore_client = FirestoreClient {      
+                    client: Mutex::new(firestore),
+            };
 
     let firestore_client = Arc::new(firestore_client);
     let firestore_client_filter = warp::any().map(move || Arc::clone(&firestore_client));
 
 
     let callback_discord_route = warp::path("callback")
-        .and(warp::path("discord"))
-        .and(warp::query::<(String, String)>())
-        .and(warp::any().map(move || Arc::clone(&firestore_client)))
-        .and_then(
-            |(code, _state, firestore_client): (String, String, Arc<FirestoreClient>)| async move {
+    .and(warp::path("discord"))
+    .and(warp::query::<(String, String)>())
+    .map(|(code, _): (String, String)| code)
+    .and_then(
+        |code: String| {
+            let firestore_client = Arc::clone(&firestore_client);
+            async move {
                 match get_discord_id(code, firestore_client).await {
                     Ok(discord_id) => {
                         // Redirect the user to a success page or the home page
-                        Ok(warp::reply::html("<html><body>Login successful</body></html>"))
+                        Ok(warp::reply::with_header(
+                            warp::reply::html("<html><body>Login successful</body></html>"),
+                            "Content-Type", 
+                            "text/html"))
                     },
                     Err(_) => {
                         // Redirect the user to an error page or the home page with an error message
-                        Ok(warp::reply::html("<html><body>Login failed</body></html>"))
+                        Ok(warp::reply::with_header(
+                            warp::reply::html("<html><body>Login failed</body></html>"),
+                            "Content-Type", 
+                            "text/html"))
                     }
                 }
-            },
-        );
-
+            }
+        }
+    );
     // Start the Warp server
-    warp::serve(callback_discord_route).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(callback_discord_route).run((Ipv4Addr::new(0, 0, 0, 0), 3030)).await;
+    //wtf is that shit? "Setting the Content-Type header to text/html in the responses:"
+    Ok(warp::reply::with_header(
+        warp::reply::html("<html><body>Login successful</body></html>"),
+        "Content-Type", 
+        "text/html"));
 }
