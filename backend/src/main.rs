@@ -9,6 +9,7 @@ use oauth2::{
 use serde::{Deserialize, Serialize};
 use reqwest::header::AUTHORIZATION;
 use tokio::sync::Mutex;
+use base64::decode;
 
 struct FirestoreClient {
     pub client: Mutex<Arc<Firestore>>,
@@ -118,9 +119,8 @@ async fn main() {
     let requested_scopes = std::env::var("REQUESTED_SCOPES")
         .expect("Requested scopes not found in environment variables");
 
-        let private_key_str = std::env::var("FIREBASE_PRIVATE_KEY").unwrap();
-    
-        let private_key = private_key_str.replace("\\", "\n");
+        let base64_key = env::var("FIREBASE_PRIVATE_KEY").unwrap();
+        let private_key = String::from_utf8(decode(&base64_key).unwrap()).unwrap();
         
         let mut service_account_info: HashMap<&str, &str> = HashMap::new();
         service_account_info.insert("private_key", private_key.as_str());
