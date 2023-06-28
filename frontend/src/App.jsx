@@ -167,7 +167,7 @@ const saveUserData = async () => {
 };
 
 const deposit = () => {
-  const amount = web3.utils.toWei('0.1', 'ether'); 
+  const amount = web3.utils.toWei('1', 'ether'); 
   contract.methods.deposit(amount).send({ from: ethAddress })
     .on('transactionHash', function(hash) {
       console.log(hash);
@@ -176,7 +176,7 @@ const deposit = () => {
 
 const withdraw = () => {
   // You need to adjust the amount according to your needs 
-  const amount = web3.utils.toWei('0.1', 'ether'); 
+  const amount = web3.utils.toWei('1', 'ether'); 
   contract.methods.withdraw(amount).send({ from: ethAddress })
     .on('transactionHash', function(hash) {
       console.log(hash);
