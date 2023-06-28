@@ -120,7 +120,7 @@ async fn main() {
 
         let private_key_str = std::env::var("FIREBASE_PRIVATE_KEY").unwrap();
     
-        let private_key = private_key_str.replace("\\n", "\n");
+        let private_key = private_key_str.replace("\\", "\n");
         
         let mut service_account_info: HashMap<&str, &str> = HashMap::new();
         service_account_info.insert("private_key", private_key.as_str());
