@@ -48,7 +48,7 @@ function MyComponent() {
   async function connectWallet() {
     if (window.ethereum) {
       const provider = new providers.Web3Provider(window.ethereum);
-      const signer = providers.getSigner();
+      const signer = provider.getSigner();
       setSigner(signer);
     }
   }
