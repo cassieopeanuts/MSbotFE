@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import Web3 from 'web3';
+import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import logo from './logo.png';
 import mainlogoImage from './main-logo.png';
@@ -40,92 +40,30 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
+function MyComponent() {
+  const [signer, setSigner] = useState();
+
+  async function connectWallet() {
     if (window.ethereum) {
-      window.ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => {
-        if (accounts.length > 0) {
-          setEthAddress(accounts[0]);
-        }
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (ethAddress) {
-      const web3Instance = new Web3(window.ethereum);
-      const contractInstance = new web3Instance.eth.Contract('your contract ABI here', 'your contract address here');
-      setWeb3(web3Instance);
-      setContract(contractInstance);
-    }
-  }, [ethAddress]);
-
-  useEffect(() => {
-    const getProvider = async () => {
-      const provider = await detectEthereumProvider({ silent: true });
-      setHasProvider(Boolean(provider));
-
-      if (provider) {
-        const accounts = await window.ethereum.request(
-          { method: 'eth_accounts' }
-        )
-        refreshAccounts(accounts)
-        window.ethereum.on('accountsChanged', refreshAccounts)
-        window.ethereum.on('chainChanged', refreshChain)
-      }
-    }
-
-    const refreshAccounts = (accounts) => {
-      if (accounts.length > 0) {
-        updateWallet(accounts)
-      } else {
-        setWallet(initialState)
-      }
-    }
-
-    const refreshChain = (chainId) => {
-      setWallet((wallet) => ({ ...wallet, chainId }))
-    }
-
-    getProvider()
-
-    return () => {
-      if(window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', refreshAccounts)
-        window.ethereum.removeListener('chainChanged', refreshChain)
-      }
-    }
-  }, []);
-
-  const updateWallet = async (accounts) => {
-    if(window.ethereum) {
-      let balance = await window.ethereum.request({
-        method: "eth_getBalance",
-        params: [accounts[0], "latest"],
-      })
-      balance = web3.utils.fromWei(balance, 'ether');  // Convert from Wei to Ether
-      const chainId = await window.ethereum.request({
-        method: "eth_chainId",
-      })
-      setWallet({ accounts, balance, chainId });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      setSigner(signer);
     }
   }
-  
-  const handleConnect = async () => {
-    setIsConnecting(true)
-    if(window.ethereum) {
-      await window.ethereum.request({
-        method: "eth_requestAccounts",
-      })
-      .then((accounts) => {
-        setError(false)
-        updateWallet(accounts)
-      })
-      .catch((err) => {
-        setError(true)
-        setErrorMessage(err.message)
-      })
-      setIsConnecting(false)
-    }
+
+  return (
+    <button onClick={connectWallet}>Connect Wallet</button> 
+  );
+}
+
+  const deposit = async () => {
+    const amount = ethers.utils.parseEther('0.0000000000000001');
+    await contract.deposit(amount);
+  }
+
+  const withdraw = async () => { 
+    const amount = ethers.utils.parseEther('0.0000000000000001');  
+    await contract.withdraw(amount);     
   }
 
 // Function to get Discord user ID
@@ -166,23 +104,6 @@ const saveUserData = async () => {
     });
   }
 };
-
-const deposit = () => {
-  const amount = web3.utils.toWei('0.0000000000000001', 'ether'); 
-  contract.methods.deposit(amount.toString()).send({ from: ethAddress })
-    .on('transactionHash', function(hash) {
-      console.log(hash);
-    });
-}
-
-const withdraw = () => {
-  // You need to adjust the amount according to your needs 
-  const amount = web3.utils.toWei('0.0000000000000001', 'ether'); 
-  contract.methods.withdraw(amount.toString()).send({ from: ethAddress })
-    .on('transactionHash', function(hash) {
-      console.log(hash);
-    });
-}
 
   return (
     <div className="App">
