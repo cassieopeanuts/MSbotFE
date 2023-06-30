@@ -41,7 +41,7 @@ function App() {
 
     if (provider) {
       try {
-        await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x507' }] });
+        await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '1287' }] });
       } catch (switchError) {
         if (switchError.code === 4902) {
           try {
@@ -49,7 +49,7 @@ function App() {
               method: 'wallet_addEthereumChain',
               params: [
                 {
-                  chainId: '0x507',
+                  chainId: '1287',
                   chainName: 'Moonriver',
                   nativeCurrency: {
                     name: 'Moonriver',
