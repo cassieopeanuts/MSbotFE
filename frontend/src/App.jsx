@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { ethers } from 'ethers';
+import { providers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import logo from './logo.png';
 import mainlogoImage from './main-logo.png';
@@ -43,10 +44,11 @@ function App() {
 function MyComponent() {
   const [signer, setSigner] = useState();
 
+
   async function connectWallet() {
     if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      const provider = new providers.Web3Provider(window.ethereum);
+      const signer = providers.getSigner();
       setSigner(signer);
     }
   }
