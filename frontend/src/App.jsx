@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import useEthers from './useEthers';
 import { ethers } from 'ethers';
 import { providers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -23,16 +24,18 @@ import cassieImage from './cassie.png';
 function App() {
   const [loading, setLoading] = useState(true);
   const [infoPopupOpen, setInfoPopupOpen] = useState(false);
-  const [ethAddress, setEthAddress] = useState(null);
-  const [web3, setWeb3] = useState(null);
-  const [contract, setContract] = useState(null);
-  const [hasProvider, setHasProvider] = useState(null);
-  const initialState = { accounts: [], chainId: "" };
-  const [wallet, setWallet] = useState(initialState);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+   const { signer, connectWallet } = useEthers();
 
+  const contract = newContract();
+
+  function newContract() {
+    return new ethers.Contract(contractAddress, contractABI);  
+  }
+
+  return (
+    <button onClick={connectWallet}>Connect</button>  
+  )
+}
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
