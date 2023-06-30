@@ -20,21 +20,14 @@ import tipsReceivedImage from './tips-received.png';
 import myStatsImage from './my-stats.png';
 import cassieImage from './cassie.png';
 
+const placeholderContractAddress = '0x...'; // Replace with actual contract address
+const placeholderABI = []; // Replace with actual ABI
+
 function App() {
   const [loading, setLoading] = useState(true);
   const [infoPopupOpen, setInfoPopupOpen] = useState(false);
-   const { signer, connectWallet } = useEthers();
+  const [signer, setSigner] = useState();
 
-  const contract = newContract();
-
-  function newContract() {
-    return new ethers.Contract(contractAddress, contractABI);  
-  }
-
-  return (
-    <button onClick={connectWallet}>Connect</button>  
-  )
-}
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -43,42 +36,64 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-function MyComponent() {
-  const [signer, setSigner] = useState();
+  const connectWallet = async () => {
+    const provider = await detectEthereumProvider();
 
+    if (provider) {
+      try {
+        await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x507' }] });
+      } catch (switchError) {
+        if (switchError.code === 4902) {
+          try {
+            await provider.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x507',
+                  chainName: 'Moonriver',
+                  nativeCurrency: {
+                    name: 'Moonriver',
+                    symbol: 'MOVR',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://rpc.moonriver.moonbeam.network'],
+                  blockExplorerUrls: ['https://blockscout.moonriver.moonbeam.network/'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error('Failed to add Moonriver network');
+          }
+        }
+      }
 
-  async function connectWallet() {
-    if (window.ethereum) {
-      const provider = new providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      setSigner(signer);
+      const ethProvider = new ethers.providers.Web3Provider(provider);
+      const ethSigner = ethProvider.getSigner();
+      setSigner(ethSigner);
     }
-  }
-
-  return (
-    <button onClick={connectWallet}>Connect Wallet</button> 
-  );
-}
-
-const deposit = async () => {
-  const amount = ethers.utils.parseEther('0.0000000000000001');
-  const depositData = contract.interface.encodeFunctionData("deposit", [amount]);  
-  const tx = {
-    to: contractAddress,
-    data: depositData
   };
-  await signer.sendTransaction(tx);
-}
 
-const withdraw = async () => {
-  const amount = ethers.utils.parseEther('0.0000000000000001');
-  const withdrawData = contract.interface.encodeFunctionData("withdraw", [amount]);  
-  const tx = {
-    to: contractAddress,
-    data: withdrawData  
+  const contract = new ethers.Contract(placeholderContractAddress, placeholderABI, signer);
+
+  const deposit = async () => {
+    const amount = ethers.utils.parseEther('0.0000000000000001');
+    const depositData = contract.interface.encodeFunctionData("deposit", [amount]);
+    const tx = {
+      to: placeholderContractAddress,
+      data: depositData,
+    };
+    await signer.sendTransaction(tx);
   };
-  await signer.sendTransaction(tx);     
-}  
+
+  const withdraw = async () => {
+    const amount = ethers.utils.parseEther('0.0000000000000001');
+    const withdrawData = contract.interface.encodeFunctionData("withdraw", [amount]);
+    const tx = {
+      to: placeholderContractAddress,
+      data: withdrawData,
+    };
+    await signer.sendTransaction(tx);
+  };
 
 // Function to get Discord user ID
 const getDiscordUserId = async () => {
