@@ -56,15 +56,25 @@ function MyComponent() {
   );
 }
 
-  const deposit = async () => {
-    const amount = ethers.utils.parseEther('0.0000000000000001');
-    await contract.deposit(amount);
-  }
+const deposit = async () => {
+  const amount = ethers.utils.parseEther('0.0000000000000001');
+  const depositData = contract.interface.encodeFunctionData("deposit", [amount]);  
+  const tx = {
+    to: contractAddress,
+    data: depositData
+  };
+  await signer.sendTransaction(tx);
+}
 
-  const withdraw = async () => { 
-    const amount = ethers.utils.parseEther('0.0000000000000001');  
-    await contract.withdraw(amount);     
-  }
+const withdraw = async () => {
+  const amount = ethers.utils.parseEther('0.0000000000000001');
+  const withdrawData = contract.interface.encodeFunctionData("withdraw", [amount]);  
+  const tx = {
+    to: contractAddress,
+    data: withdrawData  
+  };
+  await signer.sendTransaction(tx);     
+}  
 
 // Function to get Discord user ID
 const getDiscordUserId = async () => {
