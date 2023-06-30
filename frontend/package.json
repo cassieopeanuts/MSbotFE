@@ -13,7 +13,7 @@
     "react-scripts-dependencies-upgraded": "^1.5.5",
     "typescript": "^5.1.3",
     "web-vitals": "3.3.2",
-    "web3": "4.0.1"
+    "ethers": "6.6.2"
   },
   "scripts": {
     "start": "react-scripts start",
