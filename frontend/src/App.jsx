@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { ethers } from 'ethers';
-import { providers } from 'ethers/providers';
+
 import detectEthereumProvider from '@metamask/detect-provider';
 import logo from './logo.png';
 import mainlogoImage from './main-logo.png';
