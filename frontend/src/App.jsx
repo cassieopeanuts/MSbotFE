@@ -1,9 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
-import { ethers } from 'ethers';
-
-import detectEthereumProvider from '@metamask/detect-provider';
-import logo from './logo.png';
 import mainlogoImage from './main-logo.png';
 import infoImage from './info.png';
 import loginImage from './login.png';
@@ -19,6 +14,10 @@ import tipsGivenImage from './tips-given.png';
 import tipsReceivedImage from './tips-received.png';
 import myStatsImage from './my-stats.png';
 import cassieImage from './cassie.png';
+import logo from './logo.png';
+import './App.css';
+import { ethers } from 'ethers';
+import detectEthereumProvider from '@metamask/detect-provider';
 
 const placeholderContractAddress = '0x...'; // Replace with actual contract address
 const placeholderABI = []; // Replace with actual ABI
