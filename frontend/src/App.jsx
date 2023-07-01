@@ -14,13 +14,6 @@ import tipsGivenImage from './tips-given.png';
 import tipsReceivedImage from './tips-received.png';
 import myStatsImage from './my-stats.png';
 import cassieImage from './cassie.png';
-import logo from './logo.png';
-import './App.css';
-import { useEthers, useContractFunction } from '@usedapp/core';
-import detectEthereumProvider from '@metamask/detect-provider';
-
-const placeholderContractAddress = '0x...'; // Replace with actual contract address
-const placeholderABI = []; // Replace with actual ABI
 
 function App() {
   const { activateBrowserWallet, account, library } = useEthers();
@@ -39,6 +32,15 @@ function App() {
 
   const [loading, setLoading] = useState(true);
   const [infoPopupOpen, setInfoPopupOpen] = useState(false);
+  const [ethAddress, setEthAddress] = useState(null);
+  const [web3, setWeb3] = useState(null);
+  const [contract, setContract] = useState(null);
+  const [hasProvider, setHasProvider] = useState(null);
+  const initialState = { accounts: [], chainId: "" };
+  const [wallet, setWallet] = useState(initialState);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -51,37 +53,69 @@ function App() {
   const connectWallet = async () => {
     const provider = await detectEthereumProvider();
 
-    if (provider) {
-      try {
-        await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '1287' }] });
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          try {
-            await provider.request({
-              method: 'wallet_addEthereumChain',
-              params: [
-                {
-                  chainId: '1285',
-                  chainName: 'Moonriver',
-                  nativeCurrency: {
-                    name: 'Moonriver',
-                    symbol: 'MOVR',
-                    decimals: 18,
-                  },
-                  rpcUrls: ['https://moonriver.api.onfinality.io/public-ws'],
-                  blockExplorerUrls: ['https://moonriver.moonscan.io/'],
-                },
-              ],
-            });
-          } catch (addError) {
-            console.error('Failed to add Moonriver network');
-          }
-        }
+      if (provider) {
+        const accounts = await window.ethereum.request(
+          { method: 'eth_accounts' }
+        )
+        refreshAccounts(accounts)
+        window.ethereum.on('accountsChanged', refreshAccounts)
+        window.ethereum.on('chainChanged', refreshChain)
       }
-
-      await activateBrowserWallet();
     }
-  };
+
+    const refreshAccounts = (accounts) => {
+      if (accounts.length > 0) {
+        updateWallet(accounts)
+      } else {
+        setWallet(initialState)
+      }
+    }
+
+    const refreshChain = (chainId) => {
+      setWallet((wallet) => ({ ...wallet, chainId }))
+    }
+
+    getProvider()
+
+    return () => {
+      if(window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', refreshAccounts)
+        window.ethereum.removeListener('chainChanged', refreshChain)
+      }
+    }
+  }, []);
+
+  const updateWallet = async (accounts) => {
+    if(window.ethereum) {
+      let balance = await window.ethereum.request({
+        method: "eth_getBalance",
+        params: [accounts[0], "latest"],
+      })
+      balance = web3.utils.fromWei(balance, 'ether');  // Convert from Wei to Ether
+      const chainId = await window.ethereum.request({
+        method: "eth_chainId",
+      })
+      setWallet({ accounts, balance, chainId });
+    }
+  }
+  
+  const handleConnect = async () => {
+    setIsConnecting(true)
+    if(window.ethereum) {
+      await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })
+      .then((accounts) => {
+        setError(false)
+        updateWallet(accounts)
+      })
+      .catch((err) => {
+        setError(true)
+        setErrorMessage(err.message)
+      })
+      setIsConnecting(false)
+    }
+  }
 
   // Function to get Discord user ID
   const getDiscordUserId = async () => {
