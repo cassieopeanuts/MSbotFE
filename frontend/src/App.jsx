@@ -61,15 +61,15 @@ function App() {
               method: 'wallet_addEthereumChain',
               params: [
                 {
-                  chainId: '1287',
+                  chainId: '1285',
                   chainName: 'Moonriver',
                   nativeCurrency: {
                     name: 'Moonriver',
                     symbol: 'MOVR',
                     decimals: 18,
                   },
-                  rpcUrls: ['https://rpc.moonriver.moonbeam.network'],
-                  blockExplorerUrls: ['https://blockscout.moonriver.moonbeam.network/'],
+                  rpcUrls: ['https://moonriver.api.onfinality.io/public'],
+                  blockExplorerUrls: ['https://moonriver.moonscan.io/'],
                 },
               ],
             });
